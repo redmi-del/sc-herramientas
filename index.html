@@ -161,12 +161,12 @@ details code { font: 400 12.5px var(--mono); background: var(--hundido); padding
   <section class="paso">
     <div class="cabeza"><span class="num">03</span><h2>Imprimir</h2></div>
     <div class="cuerpo">
-      <p class="nota">La etiqueta de prueba usa la misma cabecera TSPL que <code>etiquetas_pedido.py</code>: 80 × 50 mm, códigos de barras Code128.</p>
+      <p class="nota">La etiqueta de prueba usa una cabecera TSPL estándar: 80 × 50 mm, código de barras Code128.</p>
       <div class="botones">
         <button type="button" class="senal" id="btn-prueba" disabled>Etiqueta de prueba</button>
         <button type="button" id="btn-corte" disabled>Avanzar una etiqueta</button>
       </div>
-      <label class="campo" for="archivo">Archivo .tspl que te mandó el bot</label>
+      <label class="campo" for="archivo">Archivo .tspl para imprimir</label>
       <input type="file" id="archivo" accept=".tspl,.bin,.prn,.txt" disabled>
       <label class="campo" for="libre">O escribí comandos TSPL a mano</label>
       <textarea id="libre" spellcheck="false" disabled></textarea>
@@ -401,9 +401,9 @@ details code { font: 400 12.5px var(--mono); background: var(--hundido); padding
     var hoy = new Date().toLocaleDateString("es-CL");
     return CABECERA +
       "CLS\n" +
-      'TEXT 24,16,"2",0,1,1,"SECOND CLOSET"\n' +
-      'TEXT 24,46,"4",0,2,2,"PRUEBA USB"\n' +
-      'TEXT 24,118,"3",0,1,1,"Impresion desde el celular"\n' +
+      'TEXT 24,16,"2",0,1,1,"PRUEBA DE IMPRESION"\n' +
+      'TEXT 24,46,"4",0,2,2,"USB OTG"\n' +
+      'TEXT 24,118,"3",0,1,1,"Enviado desde el navegador"\n' +
       'TEXT 24,150,"2",0,1,1,"' + hoy + '"\n' +
       "BARCODE " + x + ',212,"128",120,1,0,' + modulo + "," + (modulo * 2) + ',"' + codigo + '"\n' +
       "PRINT 1,1\n";
