@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Etiquetas por USB</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Instrumento de taller: una columna de pasos numerados, cada uno con su resultado
+   visible, y abajo el registro crudo. Pensado para leerse a 390 px con el celular
+   en una mano y la impresora en la otra. */
+:root {
+  --fondo: #EEEFF1; --panel: #FFFFFF; --hundido: #E4E6EA;
+  --tinta: #16181D; --tenue: #5C6270; --linea: #CDD1D8;
+  --senal: #C25A1C; --senal-piso: #FBEAE0;
+  --ok: #1F6B47; --ok-piso: #DFF0E7;
+  --mal: #A8332F; --mal-piso: #FAE3E2;
+  --espera: #8A6410; --espera-piso: #FAEFD7;
+  --display: "Archivo", "Helvetica Neue", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --fondo: #121419; --panel: #1C1F26; --hundido: #15171C;
+  --tinta: #E7E9ED; --tenue: #9BA2B0; --linea: #333845;
+  --senal: #EE8945; --senal-piso: #35200F;
+  --ok: #68C79A; --ok-piso: #10281C;
+  --mal: #F08985; --mal-piso: #331615;
+  --espera: #E0B257; --espera-piso: #2E2410;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --fondo: #121419; --panel: #1C1F26; --hundido: #15171C;
+  --tinta: #E7E9ED; --tenue: #9BA2B0; --linea: #333845;
+  --senal: #EE8945; --senal-piso: #35200F;
+  --ok: #68C79A; --ok-piso: #10281C;
+  --mal: #F08985; --mal-piso: #331615;
+  --espera: #E0B257; --espera-piso: #2E2410;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--fondo); color: var(--tinta);
+  font: 15px/1.55 var(--display);
+  margin: 0;
+  padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.hoja { max-width: 680px; margin: 0 auto; display: grid; gap: 20px; }
+
+header { display: grid; gap: 6px; }
+h1 { font: 700 clamp(26px, 6vw, 34px)/1.05 var(--display); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.bajada { color: var(--tenue); font-size: 14px; max-width: 46ch; }
+
+.soporte { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 8px;
+  font-size: 13.5px; font-weight: 500; border: 1px solid transparent; }
+.soporte.si { background: var(--ok-piso); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 28%, transparent); }
+.soporte.no { background: var(--mal-piso); color: var(--mal); border-color: color-mix(in srgb, var(--mal) 28%, transparent); }
+.soporte b { font-weight: 700; }
+
+.paso { background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; overflow: hidden; }
+.paso > .cabeza { display: flex; align-items: baseline; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--linea); }
+.num { font: 500 12px var(--mono); color: var(--senal); background: var(--senal-piso);
+  border-radius: 5px; padding: 3px 7px; flex: none; }
+.cabeza h2 { font: 600 16px var(--display); margin: 0; flex: 1 1 auto; min-width: 0; }
+.cuerpo { padding: 16px; display: grid; gap: 13px; }
+.nota { color: var(--tenue); font-size: 13.5px; margin: 0; }
+
+button {
+  font: 600 15px var(--display); border-radius: 8px; border: 1px solid var(--linea);
+  background: var(--panel); color: var(--tinta); padding: 12px 16px; cursor: pointer;
+  min-height: 46px; width: 100%;
+}
+button.senal { background: var(--senal); color: #FFF7F1; border-color: var(--senal); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:not(:disabled):active { transform: translateY(1px); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--senal); outline-offset: 2px; }
+.botones { display: grid; gap: 9px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+
+.ficha { background: var(--hundido); border: 1px solid var(--linea); border-radius: 8px; padding: 13px;
+  font: 400 12.5px/1.6 var(--mono); display: grid; gap: 3px; min-width: 0; overflow-x: auto; }
+.ficha .par { display: grid; grid-template-columns: 11.5ch minmax(0, 1fr); gap: 10px; }
+.ficha .par span:first-child { color: var(--tenue); }
+.ficha .par span:last-child { word-break: break-word; }
+.ficha h3 { font: 500 11px var(--display); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--tenue); margin: 9px 0 4px; }
+.ficha h3:first-child { margin-top: 0; }
+
+.marca { display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--display);
+  padding: 4px 9px; border-radius: 999px; justify-self: start; }
+.marca::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.m-ok { color: var(--ok); background: var(--ok-piso); }
+.m-mal { color: var(--mal); background: var(--mal-piso); }
+.m-espera { color: var(--espera); background: var(--espera-piso); }
+
+label.campo { display: grid; gap: 5px; font-size: 13px; color: var(--tenue); font-weight: 500; }
+textarea { font: 400 12.5px/1.55 var(--mono); color: var(--tinta); background: var(--hundido);
+  border: 1px solid var(--linea); border-radius: 8px; padding: 10px; width: 100%;
+  min-height: 130px; resize: vertical; }
+input[type="file"] { font: 400 13px var(--display); color: var(--tinta); width: 100%; }
+input[type="file"]::file-selector-button {
+  font: 600 13px var(--display); color: var(--tinta); background: var(--panel);
+  border: 1px solid var(--linea); border-radius: 7px; padding: 9px 13px; margin-right: 10px; cursor: pointer; }
+
+#registro { background: var(--hundido); border: 1px solid var(--linea); border-radius: 8px;
+  font: 400 12px/1.65 var(--mono); padding: 12px; max-height: 280px; overflow: auto;
+  display: grid; gap: 2px; align-content: start; }
+#registro p { margin: 0; display: grid; grid-template-columns: 8ch minmax(0, 1fr); gap: 9px; }
+#registro time { color: var(--tenue); }
+#registro .l-mal span:last-child { color: var(--mal); }
+#registro .l-ok span:last-child { color: var(--ok); }
+#registro .l-tit span:last-child { font-weight: 500; }
+
+details { background: var(--panel); border: 1px solid var(--linea); border-radius: 10px; }
+summary { cursor: pointer; padding: 13px 16px; font-weight: 600; font-size: 15px; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: " +"; color: var(--senal); font-family: var(--mono); }
+details[open] summary::after { content: " –"; }
+details .cuerpo { border-top: 1px solid var(--linea); }
+details ul { margin: 0; padding-left: 20px; display: grid; gap: 7px; color: var(--tenue); font-size: 13.5px; }
+details code { font: 400 12.5px var(--mono); background: var(--hundido); padding: 1px 5px; border-radius: 4px;
+  color: var(--tinta); }
+
+@media (prefers-reduced-motion: no-preference) { button { transition: transform .08s, opacity .15s; } }
+</style>
+
+</head>
+<body>
+<div class="hoja">
+
+  <header>
+    <h1>Etiquetas por USB</h1>
+    <p class="bajada">Manda etiquetas TSPL a la XP-420B conectada al celular por OTG, sin aplicaciones de terceros. Probá acá si el navegador puede tomar la impresora.</p>
+  </header>
+
+  <div class="soporte" id="soporte">Revisando el navegador…</div>
+
+  <section class="paso">
+    <div class="cabeza"><span class="num">01</span><h2>Conectar la impresora</h2></div>
+    <div class="cuerpo">
+      <p class="nota">Enchufá la XP-420B al celular con el adaptador OTG y encendela. Al tocar el botón, Chrome muestra la lista de dispositivos: elegí la impresora.</p>
+      <button type="button" class="senal" id="btn-buscar">Buscar impresora</button>
+      <div id="ficha-equipo" hidden></div>
+    </div>
+  </section>
+
+  <section class="paso">
+    <div class="cabeza"><span class="num">02</span><h2>Tomar el control</h2></div>
+    <div class="cuerpo">
+      <p class="nota">Acá se ve si Android deja usar la impresora desde el navegador. Si falla con un error de seguridad, el camino es una aplicación propia.</p>
+      <span class="marca m-espera" id="marca-reclamo">Sin conectar todavía</span>
+      <div id="ficha-canal" hidden></div>
+    </div>
+  </section>
+
+  <section class="paso">
+    <div class="cabeza"><span class="num">03</span><h2>Imprimir</h2></div>
+    <div class="cuerpo">
+      <p class="nota">La etiqueta de prueba usa la misma cabecera TSPL que <code>etiquetas_pedido.py</code>: 80 × 50 mm, códigos de barras Code128.</p>
+      <div class="botones">
+        <button type="button" class="senal" id="btn-prueba" disabled>Etiqueta de prueba</button>
+        <button type="button" id="btn-corte" disabled>Avanzar una etiqueta</button>
+      </div>
+      <label class="campo" for="archivo">Archivo .tspl que te mandó el bot</label>
+      <input type="file" id="archivo" accept=".tspl,.bin,.prn,.txt" disabled>
+      <label class="campo" for="libre">O escribí comandos TSPL a mano</label>
+      <textarea id="libre" spellcheck="false" disabled></textarea>
+      <button type="button" id="btn-libre" disabled>Mandar estos comandos</button>
+    </div>
+  </section>
+
+  <section class="paso">
+    <div class="cabeza"><span class="num">04</span><h2>Registro</h2></div>
+    <div class="cuerpo">
+      <div id="registro"></div>
+      <button type="button" id="btn-copiar">Copiar informe para mandarme</button>
+    </div>
+  </section>
+
+  <details>
+    <summary>Si algo no funciona</summary>
+    <div class="cuerpo">
+      <ul>
+        <li><b>No aparece ningún dispositivo:</b> el cable OTG puede ser solo de carga. Probá otro, y fijate que la impresora esté encendida.</li>
+        <li><b>Error de seguridad al tomar el control:</b> Android no deja que el navegador use impresoras. Es la respuesta que vinimos a buscar: hay que hacer la aplicación propia.</li>
+        <li><b>Dice que otro programa la está usando:</b> cerrá la app de impresión que tengas instalada y volvé a probar.</li>
+        <li><b>Imprime pero sale en blanco o corrido:</b> el rollo cargado no es de 80 × 50, o la impresora necesita calibrar el papel.</li>
+        <li><b>El navegador no sirve:</b> esto anda en Chrome sobre Android. En iPhone no hay WebUSB en ningún navegador.</li>
+      </ul>
+    </div>
+  </details>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var equipo = null, interfazTomada = null, salida = null, lineas = [];
+
+  // ---- Registro ------------------------------------------------------------
+  function anotar(texto, tipo) {
+    var hora = new Date().toLocaleTimeString("es-CL", { hour12: false });
+    lineas.push(hora + "  " + texto);
+    var p = document.createElement("p");
+    if (tipo) { p.className = "l-" + tipo; }
+    var t = document.createElement("time"); t.textContent = hora;
+    var s = document.createElement("span"); s.textContent = texto;
+    p.append(t, s);
+    $("registro").append(p);
+    $("registro").scrollTop = $("registro").scrollHeight;
+  }
+
+  function hex(n, largo) {
+    return "0x" + n.toString(16).toUpperCase().padStart(largo, "0");
+  }
+
+  function par(contenedor, etiqueta, valor) {
+    var d = document.createElement("div"); d.className = "par";
+    var a = document.createElement("span"); a.textContent = etiqueta;
+    var b = document.createElement("span"); b.textContent = valor;
+    d.append(a, b); contenedor.append(d);
+  }
+
+  function titulo(contenedor, texto) {
+    var h = document.createElement("h3"); h.textContent = texto; contenedor.append(h);
+  }
+
+  // ---- Nombres de las clases USB que nos importan --------------------------
+  var CLASES = {
+    0: "por interfaz", 1: "audio", 3: "teclado/ratón (HID)", 7: "impresora",
+    8: "almacenamiento", 9: "concentrador", 10: "datos", 11: "tarjeta inteligente",
+    14: "video", 255: "específica del fabricante"
+  };
+  function nombreClase(c) { return (CLASES[c] || "clase " + c) + " (" + c + ")"; }
+
+  // ---- Paso 1: elegir el equipo -------------------------------------------
+  function mostrarEquipo(d) {
+    var caja = $("ficha-equipo");
+    caja.className = "ficha"; caja.hidden = false; caja.replaceChildren();
+    titulo(caja, "Equipo");
+    par(caja, "Fabricante", d.manufacturerName || "(no lo informa)");
+    par(caja, "Producto", d.productName || "(no lo informa)");
+    par(caja, "Serie", d.serialNumber || "(no tiene)");
+    par(caja, "ID", hex(d.vendorId, 4) + " / " + hex(d.productId, 4));
+    (d.configurations || []).forEach(function (cfg) {
+      titulo(caja, "Configuración " + cfg.configurationValue);
+      (cfg.interfaces || []).forEach(function (itf) {
+        (itf.alternates || []).forEach(function (alt) {
+          par(caja, "Interfaz " + itf.interfaceNumber, nombreClase(alt.interfaceClass));
+          (alt.endpoints || []).forEach(function (ep) {
+            par(caja, "  canal " + ep.endpointNumber,
+                ep.direction + " · " + ep.type + " · " + ep.packetSize + " bytes");
+          });
+        });
+      });
+    });
+  }
+
+  function marcar(texto, clase) {
+    var m = $("marca-reclamo");
+    m.textContent = texto;
+    m.className = "marca " + clase;
+  }
+
+  function habilitar(si) {
+    ["btn-prueba", "btn-corte", "archivo", "libre", "btn-libre"].forEach(function (id) {
+      $(id).disabled = !si;
+    });
+  }
+
+  // ---- Paso 2: abrir y reclamar -------------------------------------------
+  function buscarSalida(d) {
+    // Preferimos una interfaz de clase impresora; si no hay, cualquiera con canal de salida.
+    var mejor = null;
+    (d.configurations || []).forEach(function (cfg) {
+      (cfg.interfaces || []).forEach(function (itf) {
+        (itf.alternates || []).forEach(function (alt) {
+          (alt.endpoints || []).forEach(function (ep) {
+            if (ep.direction !== "out" || ep.type !== "bulk") { return; }
+            var candidato = { cfg: cfg.configurationValue, itf: itf.interfaceNumber,
+                              alt: alt.alternateSetting, ep: ep.endpointNumber,
+                              clase: alt.interfaceClass, paquete: ep.packetSize };
+            if (!mejor || (alt.interfaceClass === 7 && mejor.clase !== 7)) { mejor = candidato; }
+          });
+        });
+      });
+    });
+    return mejor;
+  }
+
+  async function conectar(d) {
+    equipo = d;
+    mostrarEquipo(d);
+    anotar("Elegida: " + (d.productName || "sin nombre") + " " + hex(d.vendorId, 4) + "/" + hex(d.productId, 4), "tit");
+
+    salida = buscarSalida(d);
+    if (!salida) {
+      marcar("No tiene canal de salida", "m-mal");
+      anotar("El dispositivo no expone ningún canal de salida masivo. No se puede imprimir por acá.", "mal");
+      return;
+    }
+    anotar("Canal de salida: interfaz " + salida.itf + ", canal " + salida.ep +
+           ", " + nombreClase(salida.clase) + ", paquetes de " + salida.paquete + " bytes");
+
+    try {
+      await d.open();
+      anotar("Abierta");
+      if (d.configuration === null) {
+        await d.selectConfiguration(salida.cfg);
+        anotar("Configuración " + salida.cfg + " seleccionada");
+      }
+      await d.claimInterface(salida.itf);
+      interfazTomada = salida.itf;
+      anotar("Interfaz " + salida.itf + " tomada", "ok");
+      if (salida.alt) {
+        await d.selectAlternateInterface(salida.itf, salida.alt);
+      }
+      marcar("Impresora lista", "m-ok");
+      habilitar(true);
+      anotar("Listo: se puede imprimir desde el navegador.", "ok");
+
+      var caja = $("ficha-canal");
+      caja.className = "ficha"; caja.hidden = false; caja.replaceChildren();
+      titulo(caja, "Canal en uso");
+      par(caja, "Interfaz", String(salida.itf));
+      par(caja, "Canal", String(salida.ep));
+      par(caja, "Clase", nombreClase(salida.clase));
+      par(caja, "Paquete", salida.paquete + " bytes");
+    } catch (e) {
+      marcar("Android no deja usarla", "m-mal");
+      anotar("Falló al tomar el control: " + (e && e.name ? e.name : "?") + " — " + (e && e.message ? e.message : e), "mal");
+      if (e && e.name === "SecurityError") {
+        anotar("Es el bloqueo del navegador a esta clase de dispositivo. El camino es la aplicación propia.", "mal");
+      }
+      if (e && e.name === "NetworkError") {
+        anotar("Puede que otra aplicación de impresión la tenga tomada. Cerrala y probá de nuevo.", "mal");
+      }
+    }
+  }
+
+  $("btn-buscar").addEventListener("click", async function () {
+    if (!navigator.usb) { return; }
+    try {
+      var d = await navigator.usb.requestDevice({ filters: [] });
+      await conectar(d);
+    } catch (e) {
+      if (e && e.name === "NotFoundError") {
+        anotar("No elegiste ningún dispositivo.");
+      } else {
+        anotar("No se pudo pedir el dispositivo: " + (e && e.message ? e.message : e), "mal");
+      }
+    }
+  });
+
+  // ---- Paso 3: mandar bytes -----------------------------------------------
+  async function mandar(bytes, queEs) {
+    if (!equipo || salida === null) { return; }
+    var trozo = 4096, enviados = 0;
+    anotar("Mandando " + queEs + ": " + bytes.length + " bytes…");
+    try {
+      for (var i = 0; i < bytes.length; i += trozo) {
+        var parte = bytes.slice(i, i + trozo);
+        var r = await equipo.transferOut(salida.ep, parte);
+        if (r.status !== "ok") { throw new Error("la impresora respondió «" + r.status + "»"); }
+        enviados += r.bytesWritten;
+      }
+      anotar("Enviados " + enviados + " bytes. Mirá si salió la etiqueta.", "ok");
+    } catch (e) {
+      anotar("Falló el envío a los " + enviados + " bytes: " + (e && e.message ? e.message : e), "mal");
+    }
+  }
+
+  // TSPL en cp1252, como lo manda el servidor. Para texto ASCII es idéntico a UTF-8;
+  // los acentos se reemplazan para no mandar bytes que la impresora no entienda.
+  function aBytes(texto) {
+    var limpio = texto.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    var b = new Uint8Array(limpio.length);
+    for (var i = 0; i < limpio.length; i++) {
+      var c = limpio.charCodeAt(i);
+      b[i] = c < 256 ? c : 63; // lo que no entra en un byte va como "?"
+    }
+    return b;
+  }
+
+  var CABECERA = "SIZE 80 mm, 50 mm\nDIRECTION 1,0\nREFERENCE 0,0\nOFFSET 0 mm\n" +
+                 "SET PEEL OFF\nSET TEAR OFF\nSET BACKFEED OFF\nCODEPAGE 1252\n";
+  var ANCHO = 640; // 80 mm a 203 ppp
+
+  function etiquetaPrueba() {
+    var codigo = "PRUEBA01";
+    var modulo = codigo.length <= 8 ? 3 : 2;
+    var ancho = (11 * codigo.length + 35) * modulo;
+    var x = Math.max(20, Math.floor((ANCHO - ancho) / 2));
+    var hoy = new Date().toLocaleDateString("es-CL");
+    return CABECERA +
+      "CLS\n" +
+      'TEXT 24,16,"2",0,1,1,"SECOND CLOSET"\n' +
+      'TEXT 24,46,"4",0,2,2,"PRUEBA USB"\n' +
+      'TEXT 24,118,"3",0,1,1,"Impresion desde el celular"\n' +
+      'TEXT 24,150,"2",0,1,1,"' + hoy + '"\n' +
+      "BARCODE " + x + ',212,"128",120,1,0,' + modulo + "," + (modulo * 2) + ',"' + codigo + '"\n' +
+      "PRINT 1,1\n";
+  }
+
+  $("btn-prueba").addEventListener("click", function () {
+    mandar(aBytes(etiquetaPrueba()), "etiqueta de prueba");
+  });
+
+  $("btn-corte").addEventListener("click", function () {
+    mandar(aBytes(CABECERA + "CLS\nPRINT 1,1\n"), "etiqueta en blanco");
+  });
+
+  $("archivo").addEventListener("change", async function (ev) {
+    var f = ev.target.files && ev.target.files[0];
+    if (!f) { return; }
+    var buffer = await f.arrayBuffer();
+    anotar("Archivo " + f.name + " (" + buffer.byteLength + " bytes), se manda tal cual");
+    await mandar(new Uint8Array(buffer), f.name);
+    ev.target.value = "";
+  });
+
+  $("btn-libre").addEventListener("click", function () {
+    var t = $("libre").value;
+    if (!t.trim()) { anotar("No hay comandos que mandar."); return; }
+    mandar(aBytes(t.endsWith("\n") ? t : t + "\n"), "comandos escritos a mano");
+  });
+
+  // Guardar el borrador de comandos entre visitas (solo en este celular)
+  try {
+    var guardado = localStorage.getItem("tspl-borrador");
+    $("libre").value = guardado || CABECERA + "CLS\nTEXT 24,46,\"4\",0,2,2,\"HOLA\"\nPRINT 1,1\n";
+  } catch (e) {
+    $("libre").value = CABECERA + "CLS\nTEXT 24,46,\"4\",0,2,2,\"HOLA\"\nPRINT 1,1\n";
+  }
+  $("libre").addEventListener("input", function () {
+    try { localStorage.setItem("tspl-borrador", $("libre").value); } catch (e) { /* sin guardar */ }
+  });
+
+  // ---- Informe para copiar -------------------------------------------------
+  $("btn-copiar").addEventListener("click", async function () {
+    var texto = "Prueba WebUSB · " + new Date().toISOString() + "\n" +
+                navigator.userAgent + "\n\n" + lineas.join("\n");
+    try {
+      await navigator.clipboard.writeText(texto);
+      $("btn-copiar").textContent = "Copiado";
+      setTimeout(function () { $("btn-copiar").textContent = "Copiar informe para mandarme"; }, 2000);
+    } catch (e) {
+      var r = document.createRange();
+      r.selectNodeContents($("registro"));
+      var sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(r);
+      $("btn-copiar").textContent = "Seleccionado: copialo a mano";
+    }
+  });
+
+  // ---- Arranque ------------------------------------------------------------
+  (async function () {
+    var s = $("soporte");
+    if (!navigator.usb) {
+      s.className = "soporte no";
+      s.innerHTML = "<b>Este navegador no puede usar USB.</b>";
+      s.append(" Abrí la página en Chrome sobre Android; en iPhone no existe.");
+      $("btn-buscar").disabled = true;
+      anotar("navigator.usb no existe en este navegador.", "mal");
+      return;
+    }
+    s.className = "soporte si";
+    s.innerHTML = "<b>El navegador puede usar USB.</b>";
+    s.append(" Falta ver si Android deja tomar la impresora.");
+    anotar("WebUSB disponible.");
+
+    // Si ya le diste permiso antes, se reconecta sola
+    try {
+      var previos = await navigator.usb.getDevices();
+      if (previos.length) {
+        anotar("Ya tenías permiso para " + previos.length + " dispositivo(s); reconectando.");
+        await conectar(previos[0]);
+      }
+    } catch (e) {
+      anotar("No pude revisar permisos anteriores: " + (e && e.message ? e.message : e));
+    }
+
+    navigator.usb.addEventListener("disconnect", function (ev) {
+      if (equipo && ev.device === equipo) {
+        anotar("Se desconectó la impresora.", "mal");
+        marcar("Desconectada", "m-mal");
+        habilitar(false);
+        equipo = null; salida = null; interfazTomada = null;
+      }
+    });
+  })();
+})();
+</script>
+
+</body>
+</html>
